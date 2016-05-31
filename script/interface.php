@@ -38,13 +38,18 @@ function _pieceList($i, $fk_soc, $type) {
 			
 			$f=new Facture($db);
 			$f->fetch($obj->rowid);
+			$TPaiements = $f->getListOfPayments();
+			$remain_to_pay = $f->total_ttc;
+			if(!empty($TPaiements)) {
+				foreach($TPaiements as $TData) $remain_to_pay -= $TData['amount'];
+			}
 			
 			$s = new Societe($db);
 			$s->fetch($f->socid);
 			
 			$r.='<div style="margin:2px 0;"><span style="width:400px;display:inline-block;">'
-				.$f->getNomUrl(1).' ('.date('d/m/Y', $f->date).') '.$s->getNomUrl(1, '', 12).' <strong>'.price($f->total_ttc).'</strong></span>'
-				.'<input type="hidden" name="price_TLine[piece]['.$i.'][facture]['.$f->id.']" value="'.price2num($f->total_ttc).'" />'
+				.$f->getNomUrl(1).' ('.date('d/m/Y', $f->date).') '.$s->getNomUrl(1, '', 12).' <strong>'.price($remain_to_pay).'</strong></span>'
+				.'<input type="hidden" name="price_TLine[piece]['.$i.'][facture]['.$f->id.']" value="'.price2num($remain_to_pay).'" />'
 				.img_picto($langs->trans('AddRemind'),'rightarrow.png', 'id="TLine[piece]['.$i.'][facture]['.$f->id.']" class="auto_price"')
 				.'<input type="text" rel="priceToPaiment" value="" name="TLine[piece]['.$i.'][facture]['.$f->id.']" size="6" class="flat" /></div>';
 			
